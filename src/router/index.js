@@ -1,8 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Meta from 'vue-meta'
-// import store from '@/store/store'
 
+import globals from '@/globals'
+
+// Layouts
+import LayoutWithoutSidenav from '@/layout/LayoutWithoutSidenav'
 
 Vue.use(Router)
 Vue.use(Meta)
@@ -10,31 +13,20 @@ Vue.use(Meta)
 const router = new Router({
   base: '/',
   mode: 'history',
-  routes: [
-    {
-      name: 'Home',
-      path: '/',
-      component: () => import('@/pages/Home')
-    },
-    {
-      name: 'login',
-      path: '/login',
-      component: () => import('@/pages/Login')
-    },
-    {
-      path: '*',
-      component: () => import('@/pages/404'),
-      meta: {
-        title: 'FChat - 404: Page not found',
-        metaTags: [
-          {
-            name: 'robots',
-            content: 'noindex'
-          }
-        ]
-      }
-    }
-  ]
+  routes: [{
+    path: '/',
+    component: LayoutWithoutSidenav,
+    children: [{
+      path: '',
+      component: () => import('@/components/Home')
+    }, {
+      path: 'page-2',
+      component: () => import('@/components/Page2')
+    }, {
+      path: 'chat',
+      component: () => import('@/components/Chat')
+    }]
+  }]
 })
 
 router.afterEach(() => {
@@ -42,23 +34,17 @@ router.afterEach(() => {
   if (window.layoutHelpers && window.layoutHelpers.isSmallScreen() && !window.layoutHelpers.isCollapsed()) {
     setTimeout(() => window.layoutHelpers.setCollapsed(true, true), 10)
   }
+
+  // Scroll to top of the page
+  globals().scrollTop(0, 0)
 })
 
-// validate login and redirect to require path
-// router.beforeEach((to, from, next) => {
-//   if (to.matched.some(record => record.meta.requiresAuth)) {
-//     if (!store.getters.loggedIn) {
-//       next({ path: '/login', query: { redirect: to.fullPath } })
-//     } else {
-//       next()
-//     }
-//   } else {
-//     if (store.getters.loggedIn && to.name === 'login') {
-//       next({ path: '/' })
-//     } else {
-//       next()
-//     }
-//   }
-// })
+router.beforeEach((to, from, next) => {
+  // Set loading state
+  document.body.classList.add('app-loading')
+
+  // Add tiny timeout to finish page transition
+  setTimeout(() => next(), 10)
+})
 
 export default router
