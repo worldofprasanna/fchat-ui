@@ -2,7 +2,7 @@
   <b-navbar toggleable="lg" :variant="getLayoutNavbarBg()" class="layout-navbar align-items-lg-center container-p-x">
 
     <!-- Brand -->
-    <b-navbar-brand to="/">FChat (Francium Chat)</b-navbar-brand>
+    <b-navbar-brand to="/">Francium Chat</b-navbar-brand>
 
     <!-- Sidenav toggle -->
     <b-navbar-nav class="align-items-lg-center mr-auto mr-lg-4" v-if="sidenavToggle">
@@ -43,7 +43,7 @@ export default {
   computed: {
     ...mapGetters(['getUser']),
     current_user() {
-      return this.getUser.UserName
+      return this.getUser.UserName || localStorage.name
     }
   },
 
