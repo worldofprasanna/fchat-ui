@@ -75,9 +75,9 @@
                 <!-- <div class="text-muted small"><em>{{chatData.status}}</em></div> -->
               </div>
               <div>
-                <b-btn variant="primary btn-round icon-btn mr-1"><i class="ion ion-ios-call"></i></b-btn>
-                <b-btn variant="secondary btn-round icon-btn mr-1"><i class="ion ion-md-videocam"></i></b-btn>
-                <b-btn variant="default btn-round icon-btn"><i class="ion ion-ios-more"></i></b-btn>
+                <b-btn variant="primary btn-round icon-btn mr-1" @click="showAlert()"><i class="ion ion-ios-call"></i></b-btn>
+                <b-btn variant="secondary btn-round icon-btn mr-1" @click="showAlert()"><i class="ion ion-md-videocam"></i></b-btn>
+                <b-btn variant="default btn-round icon-btn" @click="showAlert()"><i class="ion ion-ios-more"></i></b-btn>
               </div>
             </div>
 
@@ -206,6 +206,9 @@ export default {
     },
     resetMessage () {
       this.message = ""
+    },
+    showAlert() {
+      alert('Under Constructions')
     }
   },
   mounted () {
