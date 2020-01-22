@@ -137,7 +137,7 @@
 export default {
   name: 'pages-authentication-login-v3',
   metaInfo: {
-    title: 'Login v3 - Pages'
+    title: 'Login'
   },
   data: () => ({
     credentials: {
@@ -149,7 +149,8 @@ export default {
   methods: {
     loginSubmit() {
       // debugger
-      this.$http
+      if(this.credentials.username !== '') {
+        this.$http
         .post(
           '/register',
           JSON.stringify({ UserName: this.credentials.username })
@@ -161,8 +162,10 @@ export default {
             ID: data.ID
           }
           this.$store.dispatch('setUser', payload)
+          localStorage.name = data.UserName
           this.$router.push('/chat')
         })
+      }
     }
   }
 }
