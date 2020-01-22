@@ -41,7 +41,7 @@
           <div class="flex-grow-1 position-relative">
             <perfect-scrollbar :options="{ suppressScrollX: true, wheelPropagation: true }" class="chat-contacts list-group chat-scroll py-3">
 
-              <a v-for="contact in chatContacts" :key="contact.ID" :class="{active: chatData && chatData.UserName === contact.UserName}" href="javascript:void(0)" @click="getChatData(contact.ID)" class="list-group-item list-group-item-action">
+              <a v-for="contact in contactsData" :key="contact.ID" :class="{active: chatData && chatData.UserName === contact.UserName}" href="javascript:void(0)" @click="getChatData(contact.ID)" class="list-group-item list-group-item-action">
                 <img src="https://res.cloudinary.com/mhmd/image/upload/v1564960395/avatar_usae7z.svg" class="d-block ui-w-40 rounded-circle" alt="">
                 <div class="media-body ml-3 text-capitalize">
                   {{contact.UserName}}
@@ -89,18 +89,20 @@
           <div class="flex-grow-1 position-relative">
 
             <!-- Remove `.chat-scroll` and add `.flex-grow-1` if you don't need scroll -->
-            <!-- <perfect-scrollbar :options="{ suppressScrollX: true, wheelPropagation: true }" class="chat-messages chat-scroll p-4">
-
-              <div v-for="message in chatData.messages" :key="message.date" :class="`chat-message-${message.you ? 'right' : 'left'}`" class="mb-4">
-                <div>
-                  <img src="https://res.cloudinary.com/mhmd/image/upload/v1564960395/avatar_usae7z.svg" class="ui-w-40 rounded-circle" alt>
-                  <div class="text-muted small text-nowrap mt-2">{{message.date}}</div>
+            <perfect-scrollbar :options="{ suppressScrollX: true, wheelPropagation: true }" class="chat-messages chat-scroll p-4">
+              <div v-for="message in allMessages" :key="message.ID" >
+                <!-- <div class="text-muted small text-nowrap mt-2">{{message.CreatedAt}}</div> -->
+                <div :class="`chat-message-${sentByme(message) ? 'right' : 'left'}`" class="mb-4">
+                  <div>
+                    <div>
+                      <img src="https://res.cloudinary.com/mhmd/image/upload/v1564960395/avatar_usae7z.svg" class="ui-w-40 rounded-circle" alt="">
+                    </div>
+                  </div>
+                  <div class="flex-shrink-1 bg-lighter rounded py-2 px-3" :class="sentByme(message) ? 'mr-3' : 'ml-3'">
+                    {{message.text}}
+                  </div>
                 </div>
-                <div class="flex-shrink-1 bg-lighter rounded py-2 px-3" :class="message.you ? 'mr-3' : 'ml-3'">
-                  <div class="font-weight-semibold mb-1">{{message.you ? 'You' : chatUser.name}}</div>
-                  {{message.text}}
-                </div>
-              </div> -->
+              </div>
 
             </perfect-scrollbar><!-- / .chat-messages -->
           </div>
@@ -108,10 +110,12 @@
           <!-- Chat footer -->
           <hr class="border-light m-0">
           <div class="flex-grow-0 py-3 px-4">
-            <b-input-group>
-              <b-input placeholder="Type your message" />
-              <b-btn variant="primary" slot="append">Send</b-btn>
-            </b-input-group>
+            <form @submit.prevent="sendMessage()">
+              <b-input-group>
+                <b-input v-model="message" placeholder="Type your message" />
+                <b-btn type="submit" variant="primary" slot="append">Send</b-btn>
+              </b-input-group>
+            </form>
           </div>
           <!-- / Chat footer -->
 
@@ -127,6 +131,7 @@
 <style src="@/vendor/styles/pages/chat.scss" lang="scss"></style>
 
 <script>
+import { mapGetters } from 'vuex'
 import PerfectScrollbar from '@/vendor/libs/perfect-scrollbar/PerfectScrollbar'
 
 export default {
@@ -144,103 +149,71 @@ export default {
       avatar: '1-small.png'
     },
 
-    contactsData: [
-      // { avatar: '12-small.png', name: 'Arthur Duncan', username: 'aduncan', online: false, newMessages: 0 },
-      // { avatar: '5-small.png', name: 'Nellie Maxwell', username: 'nmaxwell', online: true, newMessages: 2 },
-      // { avatar: '9-small.png', name: 'Amanda Warner', username: 'awarner', online: false, newMessages: 0 },
-      // { avatar: '6-small.png', name: 'Mae Gibson', username: 'mgibson', online: true, newMessages: 0 },
-      // { avatar: '2-small.png', name: 'Leon Wilson', username: 'lwilson', online: true, newMessages: 5 },
-      // { avatar: '7-small.png', name: 'Alice Hampton', username: 'ahampton', online: false, newMessages: 0 },
-      // { avatar: '8-small.png', name: 'Hallie Lewis', username: 'hlewis', online: false, newMessages: 1 },
-      // { avatar: '4-small.png', name: 'Kenneth Frazier', username: 'kfrazier', online: true, newMessages: 0 },
-      // { avatar: '10-small.png', name: 'Wayne Morgan', username: 'wmorgan', online: false, newMessages: 0 },
-      // { avatar: '3-small.png', name: 'Allie Rodriguez', username: 'arodriguez', online: true, newMessages: 0 },
-      // { avatar: '11-small.png', name: 'Belle Ross', username: 'bross', online: false, newMessages: 0 },
-
-      // { avatar: '12-small.png', name: 'Arthur Duncan', username: 'aduncan', online: false, newMessages: 0 },
-      // { avatar: '5-small.png', name: 'Nellie Maxwell', username: 'nmaxwell', online: true, newMessages: 2 },
-      // { avatar: '9-small.png', name: 'Amanda Warner', username: 'awarner', online: false, newMessages: 0 },
-      // { avatar: '6-small.png', name: 'Mae Gibson', username: 'mgibson', online: true, newMessages: 0 },
-      // { avatar: '2-small.png', name: 'Leon Wilson', username: 'lwilson', online: true, newMessages: 5 },
-      // { avatar: '7-small.png', name: 'Alice Hampton', username: 'ahampton', online: false, newMessages: 0 },
-      // { avatar: '8-small.png', name: 'Hallie Lewis', username: 'hlewis', online: false, newMessages: 1 },
-      // { avatar: '4-small.png', name: 'Kenneth Frazier', username: 'kfrazier1', online: true, newMessages: 0 },
-      // { avatar: '10-small.png', name: 'Wayne Morgan', username: 'wmorgan', online: false, newMessages: 0 },
-      // { avatar: '3-small.png', name: 'Allie Rodriguez', username: 'arodriguez', online: true, newMessages: 0 },
-      // { avatar: '11-small.png', name: 'Belle Ross', username: 'bross', online: false, newMessages: 0 }
-    ],
-
-    // chatData: {
-      // user: 'kfrazier',
-      // status: 'Typing...',
-      // messages: [
-      //   { you: true, text: 'Lorem ipsum dolor sit amet, vis erat denique in, dicunt prodesset te vix.', date: '2:33 am' },
-      //   { you: false, text: 'Sit meis deleniti eu, pri vidit meliore docendi ut, an eum erat animal commodo.', date: '2:34 am' },
-      //   { you: true, text: 'Cum ea graeci tractatos.', date: '2:35 am' },
-      //   { you: false, text: 'Sed pulvinar, massa vitae interdum pulvinar, risus lectus porttitor magna, vitae commodo lectus mauris et velit. Proin ultricies placerat imperdiet. Morbi varius quam ac venenatis tempus.', date: '2:36 am' },
-      //   { you: false, text: 'Cras pulvinar, sapien id vehicula aliquet, diam velit elementum orci.', date: '2:37 am' },
-      //   { you: true, text: 'Lorem ipsum dolor sit amet, vis erat denique in, dicunt prodesset te vix.', date: '2:38 am' },
-      //   { you: false, text: 'Sit meis deleniti eu, pri vidit meliore docendi ut, an eum erat animal commodo.', date: '2:39 am' },
-      //   { you: true, text: 'Cum ea graeci tractatos.', date: '2:40 am' },
-      //   { you: true, text: 'Morbi finibus, lorem id placerat ullamcorper, nunc enim ultrices massa, id dignissim metus urna eget purus.', date: '2:41 am' },
-      //   { you: false, text: 'Sed pulvinar, massa vitae interdum pulvinar, risus lectus porttitor magna, vitae commodo lectus mauris et velit. Proin ultricies placerat imperdiet. Morbi varius quam ac venenatis tempus.', date: '2:42 am' },
-      //   { you: true, text: 'Lorem ipsum dolor sit amet, vis erat denique in, dicunt prodesset te vix.', date: '2:43 am' },
-      //   { you: false, text: 'Sit meis deleniti eu, pri vidit meliore docendi ut, an eum erat animal commodo.', date: '2:44 am' }
-      // ]
-    // }
-    chatData: ''
+    contactsData: [],
+    chatData: null,
+    message: "",
+    selectedUser: null,
+    webSocket: null,
   }),
   computed: {
-    // chatUser () {
-    //   for (let i = 0, l = this.contactsData.length; i < l; i++) {
-    //     if (this.contactsData[i].username === this.chatData.user) return this.contactsData[i]
-    //   }
-    // },
-    // chatContacts () {
-    //   //
-    //   // Sort contacts (online then offline)
-    //   //
-    //   return [].concat(
-    //     // Online
-    //     this.contactsData.reduce((c, i) => {
-    //       if (i.online) c.push(i)
-    //       return c
-    //     }, []).sort(function (a, b) {
-    //       const nameA = a.name.toUpperCase()
-    //       const nameB = b.name.toUpperCase()
-
-    //       if (nameA < nameB) return -1
-    //       if (nameA > nameB) return 1
-    //       return 0
-    //     })
-    //   ).concat(
-    //     // Offline
-    //     this.contactsData.reduce((c, i) => {
-    //       if (!i.online) c.push(i)
-    //       return c
-    //     }, []).sort(function (a, b) {
-    //       const nameA = a.name.toUpperCase()
-    //       const nameB = b.name.toUpperCase()
-
-    //       if (nameA < nameB) return -1
-    //       if (nameA > nameB) return 1
-    //       return 0
-    //     })
-    //   )
-    // }
-    chatContacts() {
-      this.$http.get('/users').then((response) => {
-        this.contactsData = response.data.Value
-      })
-      return this.contactsData
-    }
+    ...mapGetters(['getUser', 'allMessages'])
   },
   methods: {
     getChatData(userID) {
-      let user = this.contactsData.find(({ID}) => {
-        return ID === userID
-      })
+      let user = this.contactsData.find(user => {return user.ID === userID})
       this.chatData = user
+      this.selectedUser = user
+      this.loadMessages()
+      this.resetMessage()
+    },
+    sendMessage () {
+      if (!this.message) {
+        return false
+      }
+      var self = this
+      // this.webSocket = new WebSocket(`ws:// ${self.process.env.VUE_APP_API_HOST} /send_message`)
+      let socket = new WebSocket("ws://localhost:4040/send_message")
+      socket.onerror = function(error) {
+        alert(`[error] ${error.message}`);
+      };
+
+      setTimeout(function(){
+        socket.send(
+          JSON.stringify({
+            receiver: self.selectedUser.UserName,
+            sender: self.getUser.UserName,
+            text: self.message
+          }
+        ))
+        self.resetMessage()
+      }, 200);
+    },
+    loadContacts () {
+      var self = this
+      this.$http.get('/users').then((response) => {
+        this.contactsData = response.data.Value.filter(user => {return user.ID !== self.getUser.ID})
+      })
+    },
+    loadMessages () {
+      var self = this
+      this.$http.get(`/messages?sender=${self.getUser.UserName}&receiver=${self.selectedUser.UserName}`)
+      .then((response) => {
+        self.$store.dispatch('storeMessages', response.data.Value)
+      })
+    },
+    sentByme (message) {
+      return this.getUser.UserName === message.sender
+    },
+    resetMessage () {
+      this.message = ""
+    }
+  },
+  mounted () {
+    this.loadContacts()
+  },
+  watch: {
+    allMessages () {
+      // scroll to bottom
     }
   }
 }

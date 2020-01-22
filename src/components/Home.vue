@@ -99,9 +99,9 @@
             <h4 class="text-center text-lighter font-weight-normal mt-5 mb-0">Login to Your Account</h4>
 
             <!-- Form -->
-            <b-form class="my-5" @submit.prevent>
+            <b-form class="my-5" @submit.prevent="submitForm()">
               <b-form-group label="Username">
-                <b-input v-model="credentials.username" @keyup.enter.native="loginSubmit()" />
+                <b-input v-model="credentials.username" />
               </b-form-group>
               <!-- <b-form-group>
                 <div slot="label" class="d-flex justify-content-between align-items-end">
@@ -113,7 +113,7 @@
 
               <div class="d-flex justify-content-between align-items-center m-0">
                 <!-- <b-check v-model="credentials.rememberMe" class="m-0">Remember me</b-check> -->
-                <b-btn variant="primary" @click="loginSubmit()">Sign In</b-btn>
+                <b-btn type="submit" variant="primary">Sign In</b-btn>
               </div>
             </b-form>
             <!-- / Form -->
@@ -143,26 +143,43 @@ export default {
     credentials: {
       username: ''
       // password: '',
-      // rememberMe: false
-    }
+      // rememberMe: false,
+    },
+    webSocket: null
   }),
   methods: {
-    loginSubmit() {
-      // debugger
-      this.$http
-        .post(
-          '/register',
-          JSON.stringify({ UserName: this.credentials.username })
-        )
-        .then(response => {
-          let data = response.data.Value
-          let payload = {
-            UserName: data.UserName,
-            ID: data.ID
+    submitForm() {
+      var self = this
+      this.webSocket = new WebSocket("ws://localhost:4040/register")
+      this.webSocket.addEventListener('message', function(e) {
+        debugger
+        let data = JSON.parse(e.data)
+        if (data.Type == "User") {
+          self.saveUserDetails(data.User)
+        } else
+        if (data.Type == "Message") {
+          self.displayNewMessage(data.Message)
+        }
+
+      })
+      setTimeout(function(){
+        self.webSocket.send(
+          JSON.stringify({
+            UserName: self.credentials.username
           }
-          this.$store.dispatch('setUser', payload)
-          this.$router.push('/chat')
-        })
+        ))
+      }, 200);
+    },
+    saveUserDetails (user) {
+      let payload = {
+        UserName: user.UserName,
+        ID: user.ID
+      }
+      this.$store.dispatch('setUser', payload)
+      this.$router.push('/chat')
+    },
+    displayNewMessage (message) {
+      this.$store.dispatch('pushMessage', message)
     }
   }
 }

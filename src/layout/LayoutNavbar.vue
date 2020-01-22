@@ -57,7 +57,7 @@ export default {
     },
 
     logout() {
-      this.$store.dispatch('clearData')
+      // this.$store.dispatch('clearData')
       this.$router.push('/')
     }
   }
