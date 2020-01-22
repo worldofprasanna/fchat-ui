@@ -176,7 +176,7 @@ export default {
         ID: user.ID
       }
       this.$store.dispatch('setUser', payload)
-      localStorage.name = data.UserName
+      localStorage.name = user.UserName
       this.$router.push('/chat')
     },
     displayNewMessage (message) {
