@@ -8,7 +8,8 @@ export default new Vuex.Store({
       UserName: '',
       ID: 0
     },
-    Messages: []
+    Messages: [],
+    current_user: localStorage.name || ''
   },
   mutations: {
     SET_USER(state, user) {
@@ -21,6 +22,11 @@ export default new Vuex.Store({
     },
     STORE_MESSAGES(state, messages) {
       Vue.set(state, 'Messages', messages)
+    },
+    CLEAR_DATA(state) {
+      state.User.UserName = ''
+      state.User.ID = 0
+      localStorage.name = ''
     }
   },
   actions: {
@@ -32,6 +38,9 @@ export default new Vuex.Store({
     },
     storeMessages({ commit }, messages) {
       commit('STORE_MESSAGES', messages)
+    },
+    clearData({commit}) {
+      commit('CLEAR_DATA')
     }
   },
   getters: {
@@ -40,6 +49,9 @@ export default new Vuex.Store({
     },
     allMessages: state => {
       return state.Messages
+    },
+    getCurrentUser: state => {
+      return state.current_user
     }
   }
 })

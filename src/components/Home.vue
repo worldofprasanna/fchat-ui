@@ -137,7 +137,7 @@
 export default {
   name: 'pages-authentication-login-v3',
   metaInfo: {
-    title: 'Login v3 - Pages'
+    title: 'Login'
   },
   data: () => ({
     credentials: {
@@ -176,6 +176,7 @@ export default {
         ID: user.ID
       }
       this.$store.dispatch('setUser', payload)
+      localStorage.name = data.UserName
       this.$router.push('/chat')
     },
     displayNewMessage (message) {
