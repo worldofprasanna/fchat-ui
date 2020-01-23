@@ -9,7 +9,8 @@ export default new Vuex.Store({
       ID: 0
     },
     Messages: [],
-    current_user: localStorage.name || ''
+    current_user: localStorage.name || '',
+    UserList: []
   },
   mutations: {
     SET_USER(state, user) {
@@ -27,6 +28,9 @@ export default new Vuex.Store({
       state.User.UserName = ''
       state.User.ID = 0
       localStorage.name = ''
+    },
+    SET_USER_LIST(state, payload) {
+      Vue.set(state, 'UserList', payload)
     }
   },
   actions: {
@@ -41,6 +45,9 @@ export default new Vuex.Store({
     },
     clearData({commit}) {
       commit('CLEAR_DATA')
+    },
+    setUserList({commit}, payload) {
+      commit('SET_USER_LIST', payload)
     }
   },
   getters: {
@@ -52,6 +59,9 @@ export default new Vuex.Store({
     },
     getCurrentUser: state => {
       return state.current_user
+    },
+    getUserList: state => {
+      return state.UserList
     }
   }
 })

@@ -57,8 +57,11 @@ export default {
     },
 
     logout() {
-      this.$store.dispatch('clearData')
-      this.$router.push('/')
+      this.$http.post(`/logout/${this.getUser.UserName}`)
+      .then((response) => {
+        this.$store.dispatch('clearData')
+        this.$router.push('/')
+      })
     }
   }
 }

@@ -165,6 +165,10 @@ export default {
           self.handleSocketResponse(JSON.parse(e.data))
         };
 
+        socket.onclose = function(e) {
+          // self.closingSocket(e)
+        }
+
       }
     }
   }
