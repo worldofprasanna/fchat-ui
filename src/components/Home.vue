@@ -152,7 +152,6 @@ export default {
       var self = this
       this.webSocket = new WebSocket("ws://localhost:4040/register")
       this.webSocket.addEventListener('message', function(e) {
-        debugger
         let data = JSON.parse(e.data)
         if (data.Type == "User") {
           self.saveUserDetails(data.User)

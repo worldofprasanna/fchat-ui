@@ -13,7 +13,7 @@
           <div class="flex-grow-0 px-4">
             <div class="media align-items-center">
               <div class="media-body">
-                <b-input class="chat-search my-3" placeholder="Search..." />
+                <b-input class="chat-search my-3" v-model="searchQuery" placeholder="Search..." />
               </div>
               <a @click.prevent="sideboxOpen = !sideboxOpen" href="#" class="chat-sidebox-toggler d-lg-none d-block text-muted text-large font-weight-light pl-3">&times;</a>
             </div>
@@ -25,7 +25,7 @@
           <!-- <div class="flex-grow-1 position-relative">
             <perfect-scrollbar :options="{ suppressScrollX: true, wheelPropagation: true }" class="chat-contacts list-group chat-scroll py-3">
 
-              <a v-for="contact in chatContacts" :key="contact.name" :class="{online: contact.online, active: chatData && chatData.user === contact.username}" href="javascript:void(0)" class="list-group-item list-group-item-action">
+              <a v-for="contact in chatContacts" :key="contact.name" :class="{online: contact.online, active: selectedUser && selectedUser.user === contact.username}" href="javascript:void(0)" class="list-group-item list-group-item-action">
                 <img src="https://res.cloudinary.com/mhmd/image/upload/v1564960395/avatar_usae7z.svg" class="d-block ui-w-40 rounded-circle" alt="">
                 <div class="media-body ml-3">
                   {{contact.name}}
@@ -40,8 +40,14 @@
 
           <div class="flex-grow-1 position-relative">
             <perfect-scrollbar :options="{ suppressScrollX: true, wheelPropagation: true }" class="chat-contacts list-group chat-scroll py-3">
-
-              <a v-for="contact in contactsData" :key="contact.ID" :class="{active: chatData && chatData.UserName === contact.UserName}" href="javascript:void(0)" @click="getChatData(contact.ID)" class="list-group-item list-group-item-action">
+              <a
+                v-for="contact in searchQuery.trim().length ? filteredUsers : allUsers"
+                :key="contact.ID"
+                href="javascript:void(0)"
+                @click="getChatData(contact.ID)"
+                :class="{active: selectedUser && selectedUser.UserName === contact.UserName}"
+                class="list-group-item list-group-item-action"
+              >
                 <img src="https://res.cloudinary.com/mhmd/image/upload/v1564960395/avatar_usae7z.svg" class="d-block ui-w-40 rounded-circle" alt="">
                 <div class="media-body ml-3 text-capitalize">
                   {{contact.UserName}}
@@ -55,7 +61,7 @@
           </div>
 
         </div>
-        <div v-if="!chatData" class="d-flex col justify-content-center align-items-center">
+        <div v-if="!selectedUser" class="d-flex col justify-content-center align-items-center">
           <div class="text-lighter text-large">Select a chat</div>
         </div>
         <div v-else class="d-flex col flex-column">
@@ -71,8 +77,8 @@
                 <img src="https://res.cloudinary.com/mhmd/image/upload/v1564960395/avatar_usae7z.svg" class="ui-w-40 rounded-circle" alt="">
               </div>
               <div class="media-body pl-3 text-capitalize">
-                <strong>{{chatData.UserName}}</strong>
-                <!-- <div class="text-muted small"><em>{{chatData.status}}</em></div> -->
+                <strong>{{selectedUser.UserName}}</strong>
+                <!-- <div class="text-muted small"><em>{{selectedUser.status}}</em></div> -->
               </div>
               <div>
                 <b-btn variant="primary btn-round icon-btn mr-1" @click="showAlert()"><i class="ion ion-ios-call"></i></b-btn>
@@ -149,19 +155,29 @@ export default {
       avatar: '1-small.png'
     },
 
-    contactsData: [],
-    chatData: null,
+    allUsers: [],
     message: "",
     selectedUser: null,
     webSocket: null,
+    searchQuery: ""
   }),
   computed: {
-    ...mapGetters(['getUser', 'allMessages'])
+    ...mapGetters(['getUser', 'allMessages']),
+    filteredUsers () {
+      if (!!this.searchQuery.trim()) {
+        return this.allUsers.filter(user =>
+          {
+            return user.UserName.toLowerCase().indexOf(this.searchQuery.toLowerCase()) != -1
+          }
+        )
+      } else {
+        return []
+      }
+    }
   },
   methods: {
     getChatData(userID) {
-      let user = this.contactsData.find(user => {return user.ID === userID})
-      this.chatData = user
+      let user = this.allUsers.find(user => {return user.ID === userID})
       this.selectedUser = user
       this.loadMessages()
       this.resetMessage()
@@ -191,7 +207,8 @@ export default {
     loadContacts () {
       var self = this
       this.$http.get('/users').then((response) => {
-        this.contactsData = response.data.Value.filter(user => {return user.ID !== self.getUser.ID})
+        this.allUsers = response.data.Value.filter(user => {return user.ID !== self.getUser.ID})
+        this.selectFirstUser()
       })
     },
     loadMessages () {
@@ -201,6 +218,10 @@ export default {
         self.$store.dispatch('storeMessages', response.data.Value)
       })
     },
+    selectFirstUser () {
+      this.selectedUser = this.allUsers[0]
+      this.getChatData(this.selectedUser.ID)
+    },
     sentByme (message) {
       return this.getUser.UserName === message.sender
     },
@@ -209,6 +230,11 @@ export default {
     },
     showAlert() {
       alert('Under Constructions')
+    },
+    searchContacts () {
+      console.log(this.searchQuery)
+      // var self = this
+      // this.filteredUsers = this.allUsers.filter(user => { return user.UserName === self.searchQuery })
     }
   },
   mounted () {
