@@ -102,6 +102,9 @@
             <b-form class="my-5" @submit.prevent="submitForm()">
               <b-form-group label="Username">
                 <b-input v-model="credentials.username" />
+                <div class="text-danger small" v-show="showError">
+                  Username is required.
+                </div>
               </b-form-group>
               <!-- <b-form-group>
                 <div slot="label" class="d-flex justify-content-between align-items-end">
@@ -110,7 +113,6 @@
                 </div>
                 <b-input type="password" v-model="credentials.password" />
               </b-form-group>-->
-
               <div class="d-flex justify-content-between align-items-center m-0">
                 <!-- <b-check v-model="credentials.rememberMe" class="m-0">Remember me</b-check> -->
                 <b-btn type="submit" variant="primary">Sign In</b-btn>
@@ -146,11 +148,16 @@ export default {
       // password: '',
       // rememberMe: false,
     },
-    webSocket: null
+    webSocket: null,
+    showError: false
   }),
   mixins: [utility],
   methods: {
     submitForm() {
+      if (!this.credentials.username.trim()) {
+        this.showError = true
+        return false
+      }
       var self = this
       var socket = new WebSocket("ws://localhost:4040/register")
       socket.onopen = function(e) {
