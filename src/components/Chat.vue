@@ -84,7 +84,6 @@
                 <b-btn variant="primary btn-round icon-btn mr-1" @click="showAlert()"><i class="ion ion-ios-call"></i></b-btn>
                 <b-btn variant="secondary btn-round icon-btn mr-1" @click="showAlert()"><i class="ion ion-md-videocam"></i></b-btn>
                 <b-btn variant="default btn-round icon-btn" @click="showAlert()"><i class="ion ion-ios-more"></i></b-btn>
-                <b-btn variant="default btn-round icon-btn" @click="deleteUser()"><i class="ion ion-ios-call"></i></b-btn>
               </div>
             </div>
 
@@ -97,17 +96,10 @@
 
             <!-- Remove `.chat-scroll` and add `.flex-grow-1` if you don't need scroll -->
             <perfect-scrollbar :options="{ suppressScrollX: true, wheelPropagation: true }" class="chat-messages chat-scroll p-4">
-              <div v-for="message in allMessages" :key="message.ID" >
+              <div v-for="message in allMessages" :key="message.ID" :class="`text-${sentByme(message) ? 'right' : 'left'}`" >
                 <!-- <div class="text-muted small text-nowrap mt-2">{{message.CreatedAt}}</div> -->
-                <div :class="`chat-message-${sentByme(message) ? 'right' : 'left'}`" class="mb-4">
-                  <div>
-                    <div>
-                      <img src="https://res.cloudinary.com/mhmd/image/upload/v1564960395/avatar_usae7z.svg" class="ui-w-40 rounded-circle" alt="">
-                    </div>
-                  </div>
-                  <div class="flex-shrink-1 bg-lighter rounded py-2 px-3" :class="sentByme(message) ? 'mr-3' : 'ml-3'">
-                    {{message.text}}
-                  </div>
+                <div :class="`chat-message chat-message-${sentByme(message) ? 'right' : 'left'}`" class="mb-4">
+                  {{message.text}}
                 </div>
               </div>
 
@@ -164,11 +156,9 @@ export default {
     ...mapGetters(['getUser', 'allMessages', 'getUserList']),
     filteredUsers () {
       if (!!this.searchQuery.trim()) {
-        return this.getUserList.filter(user =>
-          {
-            return user.UserName.toLowerCase().indexOf(this.searchQuery.toLowerCase()) != -1
-          }
-        )
+        return this.getUserList.filter(user => {
+          return user.UserName.toLowerCase().indexOf(this.searchQuery.toLowerCase()) == 0
+        })
       } else {
         return []
       }
@@ -182,11 +172,11 @@ export default {
       this.resetMessage()
     },
     sendMessage () {
-      if (!this.message) {
+      if (!this.message.trim()) {
         return false
       }
       var self = this
-      // this.webSocket = new WebSocket(`ws:// ${self.process.env.VUE_APP_API_HOST} /send_message`)
+      // let socket = new WebSocket(`ws://${process.env.VUE_APP_API_HOST}/send_message`)
       let socket = new WebSocket("ws://localhost:4040/send_message")
       socket.onerror = function(error) {
         alert(`[error] ${error.message}`);
@@ -233,11 +223,6 @@ export default {
     },
     showAlert() {
       alert('Under Constructions')
-    },
-    searchContacts () {
-      console.log(this.searchQuery)
-      // var self = this
-      // this.filteredUsers = this.allUsers.filter(user => { return user.UserName === self.searchQuery })
     }
   },
   mounted () {
