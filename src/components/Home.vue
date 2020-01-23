@@ -134,6 +134,7 @@
 <style src="@/vendor/styles/pages/authentication.scss" lang="scss"></style>
 
 <script>
+import utility from "../mixins/utility"
 export default {
   name: 'pages-authentication-login-v3',
   metaInfo: {
@@ -147,39 +148,24 @@ export default {
     },
     webSocket: null
   }),
+  mixins: [utility],
   methods: {
     submitForm() {
       var self = this
-      this.webSocket = new WebSocket("ws://localhost:4040/register")
-      this.webSocket.addEventListener('message', function(e) {
-        let data = JSON.parse(e.data)
-        if (data.Type == "User") {
-          self.saveUserDetails(data.User)
-        } else
-        if (data.Type == "Message") {
-          self.displayNewMessage(data.Message)
-        }
+      var socket = new WebSocket("ws://localhost:4040/register")
+      socket.onopen = function(e) {
 
-      })
-      setTimeout(function(){
-        self.webSocket.send(
+        socket.send(
           JSON.stringify({
             UserName: self.credentials.username
           }
         ))
-      }, 200);
-    },
-    saveUserDetails (user) {
-      let payload = {
-        UserName: user.UserName,
-        ID: user.ID
+
+        socket.onmessage = function(e) {
+          self.handleSocketResponse(JSON.parse(e.data))
+        };
+
       }
-      this.$store.dispatch('setUser', payload)
-      localStorage.name = user.UserName
-      this.$router.push('/chat')
-    },
-    displayNewMessage (message) {
-      this.$store.dispatch('pushMessage', message)
     }
   }
 }
