@@ -41,7 +41,7 @@
           <div class="flex-grow-1 position-relative">
             <perfect-scrollbar :options="{ suppressScrollX: true, wheelPropagation: true }" class="chat-contacts list-group chat-scroll py-3">
               <a
-                v-for="contact in searchQuery.trim().length ? filteredUsers : allUsers"
+                v-for="contact in searchQuery.trim().length ? filteredUsers : getUserList"
                 :key="contact.ID"
                 href="javascript:void(0)"
                 @click="getChatData(contact.ID)"
@@ -84,6 +84,7 @@
                 <b-btn variant="primary btn-round icon-btn mr-1" @click="showAlert()"><i class="ion ion-ios-call"></i></b-btn>
                 <b-btn variant="secondary btn-round icon-btn mr-1" @click="showAlert()"><i class="ion ion-md-videocam"></i></b-btn>
                 <b-btn variant="default btn-round icon-btn" @click="showAlert()"><i class="ion ion-ios-more"></i></b-btn>
+                <b-btn variant="default btn-round icon-btn" @click="deleteUser()"><i class="ion ion-ios-call"></i></b-btn>
               </div>
             </div>
 
@@ -154,18 +155,16 @@ export default {
     user: {
       avatar: '1-small.png'
     },
-
-    allUsers: [],
     message: "",
     selectedUser: null,
     webSocket: null,
     searchQuery: ""
   }),
   computed: {
-    ...mapGetters(['getUser', 'allMessages']),
+    ...mapGetters(['getUser', 'allMessages', 'getUserList']),
     filteredUsers () {
       if (!!this.searchQuery.trim()) {
-        return this.allUsers.filter(user =>
+        return this.getUserList.filter(user =>
           {
             return user.UserName.toLowerCase().indexOf(this.searchQuery.toLowerCase()) != -1
           }
@@ -177,7 +176,7 @@ export default {
   },
   methods: {
     getChatData(userID) {
-      let user = this.allUsers.find(user => {return user.ID === userID})
+      let user = this.getUserList.find(user => {return user.ID === userID})
       this.selectedUser = user
       this.loadMessages()
       this.resetMessage()
@@ -207,7 +206,11 @@ export default {
     loadContacts () {
       var self = this
       this.$http.get('/users').then((response) => {
-        this.allUsers = response.data.Value.filter(user => {return user.ID !== self.getUser.ID})
+        var allUsers = response.data.Users.Value.filter(user => {return user.ID !== self.getUser.ID})
+        var activeUsers = Object.keys(response.data.ActiveList)
+        var filteredUser = allUsers.filter(user => {return activeUsers.indexOf(user.UserName) != -1})
+
+        this.$store.dispatch('setUserList', filteredUser)
         this.selectFirstUser()
       })
     },
@@ -219,7 +222,7 @@ export default {
       })
     },
     selectFirstUser () {
-      this.selectedUser = this.allUsers[0]
+      this.selectedUser = this.getUserList[0]
       this.getChatData(this.selectedUser.ID)
     },
     sentByme (message) {
